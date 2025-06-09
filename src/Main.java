@@ -1,3 +1,4 @@
+import javax.xml.crypto.Data;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -5,17 +6,142 @@ import java.util.List;
 import java.time.format.DateTimeFormatter;
 import java.io.*;
 import java.sql.*;
+import java.util.Scanner;
 import java.util.UUID;
 
+/*
 public class Main {
     public static void main(String[] args)  {
         TODOApp.initializeTODO();
         TODOApp.addTask("Task1","JustDoIt","28-09-2025",false,"Personal",3);
         TODOApp.addTask("Task2","JustDoIt","25-09-2025",false,"Personal",3);
+        TaskStatistics.printStatistics();
         PrintTask.printOneTask(0);
-        TODOApp.setActiveTask(0);
-        TaskManager.editCategory("School");
+        TODOApp.markCompletion(0);
         PrintTask.printOneTask(0);
+        TaskStatistics.printStatistics();
+    }
+}
+*/
+
+public class Main {
+    public static void main(String[] args){
+        System.out.println("Welcome to TODO list app!\n");
+        Scanner scanner = new Scanner(System.in);
+        TODOApp.initializeTODO();
+        DataBase.loadData();
+
+        boolean running = true;
+        while (running) {
+            System.out.println("\n========= TODO Main Menu =========");
+            System.out.println("1. Create New Task");
+            System.out.println("2. Show All Tasks");
+            System.out.println("3. Mark Task as Complete/Incomplete");
+            System.out.println("4. Edit Task");
+            System.out.println("5. Print Statistics");
+            System.out.println("0. Exit");
+            System.out.print("Enter your choice: ");
+            int choice = Integer.parseInt(scanner.nextLine());
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Name: ");
+                    String name = scanner.nextLine();
+                    System.out.print("Description: ");
+                    String desc = scanner.nextLine();
+                    System.out.print("Due Date (dd-MM-yyyy): ");
+                    String date = scanner.nextLine();
+                    System.out.print("Category: ");
+                    String cat = scanner.nextLine();
+                    System.out.print("Priority (1=Low, 2=Med, 3=High): ");
+                    int prio = Integer.parseInt(scanner.nextLine());
+                    TODOApp.addTask(name, desc, date, false, cat, prio);
+                    break;
+
+                case 2:
+                    PrintTask.printCompactTaskList();
+                    break;
+
+                case 3:
+                    PrintTask.printCompactTaskList();
+                    System.out.print("Select task index to toggle completion: ");
+                    int markIndex = Integer.parseInt(scanner.nextLine());
+                    TODOApp.markCompletion(markIndex);
+                    break;
+
+                case 4:
+                    PrintTask.printCompactTaskList();
+                    System.out.print("Select task index to edit: ");
+                    int editIndex = Integer.parseInt(scanner.nextLine());
+                    TODOApp.setActiveTask(editIndex);
+
+                    boolean editing = true;
+                    while (editing) {
+                        System.out.println("\n===== Edit Task: " + TODOApp.getActiveTask().getName() + " =====");
+                        System.out.println("1. Edit Name");
+                        System.out.println("2. Edit Description");
+                        System.out.println("3. Edit Due Date");
+                        System.out.println("4. Edit Category");
+                        System.out.println("5. Edit Priority");
+                        System.out.println("6. Delete Task");
+                        System.out.println("0. Go Back");
+                        System.out.print("Your choice: ");
+                        int editChoice = Integer.parseInt(scanner.nextLine());
+
+                        switch (editChoice) {
+                            case 1:
+                                System.out.print("New Name: ");
+                                String newName = scanner.nextLine();
+                                TaskManager.editName(newName);
+                                break;
+                            case 2:
+                                System.out.print("New Description: ");
+                                String newDesc = scanner.nextLine();
+                                TaskManager.editDetail(newDesc);
+                                break;
+                            case 3:
+                                System.out.print("New Due Date (dd-MM-yyyy): ");
+                                String newDate = scanner.nextLine();
+                                TaskManager.editDueDate(newDate);
+                                break;
+                            case 4:
+                                System.out.print("New Category: ");
+                                String newCat = scanner.nextLine();
+                                TaskManager.editCategory(newCat);
+                                break;
+                            case 5:
+                                System.out.print("New Priority (1=Low, 2=Med, 3=High): ");
+                                int newPrio = Integer.parseInt(scanner.nextLine());
+                                TaskManager.editPriority(newPrio);
+                                break;
+                            case 6:
+                                TaskManager.deleteTask();
+                                editing = false;
+                                break;
+                            case 0:
+                                editing = false;
+                                break;
+                            default:
+                                System.out.println("Invalid option. Try again.");
+                        }
+                    }
+                    break;
+
+                case 5:
+                    TaskStatistics.printStatistics();
+                    break;
+
+                case 0:
+                    DataBase.saveData();
+                    running = false;
+                    System.out.println("Exiting... Bye!");
+                    break;
+
+                default:
+                    System.out.println("Invalid choice. Try again.");
+            }
+        }
+
     }
 }
 
@@ -123,8 +249,6 @@ class TODOApp{
         }
     }
 }
-// TODO load, if pass, overdue!!
-// TODO display list to edit, 99 for next instead of printing everything
 class TaskManager extends TODOApp{
     private static List<Task> listTask = getListTask();
 
@@ -182,7 +306,14 @@ class PrintTask extends TODOApp{
         System.out.println("\nStatus: "+TODOApp.printStatus(getActiveTask().getStatus()));
         System.out.println("===============================================");
     }
-
+    static public void printCompactTaskList() {
+        System.out.println("\nTasks (Sorted by: " + getSortBy() + ")");
+        List<Task> listTask = getListTask();
+        for (int i = 0; i < listTask.size(); i++) {
+            Task t = listTask.get(i);
+            System.out.println(i + ". " + t.getName() + " | Due: " + t.getDate() + " | " + printStatus(t.getStatus()) + " | " + printPriority(t.getPriority()));
+        }
+    }
 }
 class SortTask extends TODOApp {
     // Task Sorting
@@ -337,4 +468,26 @@ class DataBase {
         }
     }
 
+}
+
+class TaskStatistics extends TODOApp {
+
+    private static List<Task> listTask = getListTask();
+
+    public static void printStatistics() {
+        int total = listTask.size();
+        int completed = 0;
+        for (Task t : listTask) {
+            if (t.getStatus()) completed++;
+        }
+        int pending = total - completed;
+        double rate = (total > 0) ? (completed * 100.0 / total) : 0;
+
+        System.out.println("\n==================== DASHBOARD ====================");
+        System.out.println(" Total Tasks        : " + total);
+        System.out.println(" Completed Tasks    : " + completed);
+        System.out.println(" Pending Tasks      : " + pending);
+        System.out.printf(" Completion Rate    : %.2f%%\n", rate);
+        System.out.println("===================================================");
+    }
 }
