@@ -5,6 +5,7 @@ public class Main{
         System.out.println("Welcome to TODO list app!\n");
         Scanner scanner = new Scanner(System.in);
         TODOApp.initializeTODO();
+        TaskRecurrence.initializeTaskRecurrence();
         DataBase.loadData();
         DataBase.loadRecurringTask();
 
@@ -17,6 +18,8 @@ public class Main{
             System.out.println("4. Edit Task");
             System.out.println("5. Edit Recurring Task");
             System.out.println("6. Print Statistics");
+            System.out.println("7. Sort Tasks");
+            System.out.println("8. Search Task");
             System.out.println("0. Exit");
             System.out.print("Enter your choice: ");
             int choice = Integer.parseInt(scanner.nextLine());
@@ -140,6 +143,7 @@ public class Main{
                                     switch (editDependency){
                                         case 1:
                                             System.out.println("Enter the task for "+TODOApp.getActiveTask().getName()+" to depend on: ");
+
                                             TaskDependency.addDependency(TODOApp.getListTask().get(Integer.parseInt(scanner.nextLine())));
                                             break;
                                         case 2:
@@ -168,6 +172,46 @@ public class Main{
                 case 6:
                     TaskStatistics.printStatistics();
                     break;
+                case 7:
+                    boolean sorting = true;
+                    while (sorting) {
+                        System.out.println("\n========= Sort Tasks =========");
+                        System.out.println("1. Sort by Due Date (Ascending)");
+                        System.out.println("2. Sort by Due Date (Descending)");
+                        System.out.println("3. Sort by Priority (Ascending)");
+                        System.out.println("4. Sort by Priority (Descending)");
+                        System.out.println("0. Back");
+                        System.out.print("Enter your choice: ");
+                        int sortChoice = Integer.parseInt(scanner.nextLine());
+
+                        switch (sortChoice) {
+                            case 1:
+                                SortTask.sortTaskAscendingDue();
+                                break;
+                            case 2:
+                                SortTask.sortTaskDescendingDue();
+                                break;
+                            case 3:
+                                SortTask.sortTaskAscendingPriority();
+                                break;
+                            case 4:
+                                SortTask.sortTaskDescendingPriority();
+                                break;
+                            case 0:
+                                sorting = false;
+                                break;
+                            default:
+                                System.out.println("Invalid sort option. Please try again.");
+                        }
+                    }
+                    break;
+                case 8:
+                    System.out.print("Enter keyword to search (name or description): ");
+                    String keyword = scanner.nextLine();
+                    TODOApp.searchTask(keyword);
+                    break;
+
+
 
                 case 0:
                     DataBase.saveData();

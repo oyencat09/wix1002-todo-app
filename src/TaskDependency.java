@@ -4,21 +4,33 @@ import java.util.List;
 class TaskDependency {
     private static List<Task> listTask = TODOApp.getListTask();
 
+
     static public boolean checkDependency(Task a) {
         boolean canComplete = true;
-        Task loopTask = a;
+        Task activeTask = TODOApp.getActiveTask();
+        Task toAddTask = a;
 
-        while (loopTask.getDependency() != null) {
-            if (loopTask.getDependency().equals(TODOApp.getActiveTask().getUUID())) {
+        while(toAddTask != null){
+            if (toAddTask.getUUID().equals(activeTask.getUUID())) {
                 canComplete = false;
-                System.out.println("Cannot add dependency! " + loopTask.getName() + " is dependent on " + TODOApp.getActiveTask().getName()
-                        + ". \n It will cause dependency loop in task completion.");
+                System.out.println("Cannot add dependency! " + a.getName() + " is already dependent on " + activeTask.getName()
+                        + ".\nIt will cause dependency loop in task completion.");
                 break;
-            } else {
-                loopTask = TODOApp.getTaskFromUUID(loopTask.getDependency());
             }
+
+            toAddTask = TODOApp.getTaskFromUUID(toAddTask.getDependency());
         }
         return canComplete;
+    }
+
+    static public boolean canComplete(Task a){
+        boolean dependencyCompletion = true;
+        if (a.getDependency() != null){
+            if (!TODOApp.getTaskFromUUID(a.getDependency()).getStatus()){
+                dependencyCompletion = false;
+            }
+        }
+        return dependencyCompletion;
     }
 
     static public void addDependency(Task a) {

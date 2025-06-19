@@ -156,13 +156,21 @@ class TODOApp {
 
     static public void markCompletion(int i) {
         setActiveTask(i);
-        System.out.println(ActiveTask.getStatus());
+
         if (ActiveTask.getStatus()) {
             ActiveTask.setStatus(false);
+            System.out.println(ActiveTask.getName() + " marked as incomplete.");
+            return;
+        }
+
+        if (TaskDependency.canComplete(ActiveTask)) {
+            ActiveTask.setStatus(true);
             System.out.println(ActiveTask.getName() + " marked as complete!");
         } else {
-            ActiveTask.setStatus(true);
-            System.out.println(ActiveTask.getName() + " marked as incomplete.");
+            Task dep = TODOApp.getTaskFromUUID(ActiveTask.getDependency());
+            System.out.println(ActiveTask.getName() + " cannot be completed. It depends on task \"" + dep.getName() + "\". Please complete it first.");
         }
     }
 }
+
+

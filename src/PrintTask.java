@@ -1,7 +1,7 @@
 import java.util.List;
 
 class PrintTask extends TODOApp {
-    private static List<Task> listTask = getListTask();
+    private static List<Task> listTask = TODOApp.getListTask();
 
     static public void printAllTask() {
         System.out.println("\nTask List. (Sorted by= " + getSortBy() + ")");
@@ -27,8 +27,8 @@ class PrintTask extends TODOApp {
     }
 
     static public void printCompactTaskList() {
+        List<Task> listTask = TODOApp.getListTask();  // Fetch fresh every time
         System.out.println("\nTasks (Sorted by: " + getSortBy() + ")");
-        List<Task> listTask = getListTask();
         for (int i = 0; i < listTask.size(); i++) {
             Task t = listTask.get(i);
             System.out.println(i + ". " + t.getName() + " | Due: " + t.getDate() + " | " + printStatus(t.getStatus()) + " | " + printPriority(t.getPriority()));

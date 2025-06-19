@@ -15,11 +15,9 @@ class TaskRecurrence {
     public static List<Task> getDaily() {
         return daily;
     }
-
     public static List<Task> getWeekly() {
         return weekly;
     }
-
     public static List<Task> getMonthly() {
         return monthly;
     }
@@ -33,7 +31,6 @@ class TaskRecurrence {
             }
         }
     };
-
 
     private static Runnable runWeekly = new Runnable() {
         @Override
@@ -81,16 +78,13 @@ class TaskRecurrence {
 
     public static boolean checkExistingRun() {
         boolean alreadyRun = false;
-
         return alreadyRun;
     }
 
     public static void initializeTaskRecurrence() {
-        if (!checkExistingRun()) {
             ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
             scheduler.scheduleAtFixedRate(runDaily, 0, 1, TimeUnit.DAYS);
             scheduler.scheduleAtFixedRate(runWeekly, 0, 7, TimeUnit.DAYS);
             scheduler.scheduleAtFixedRate(runMonthly, 0, 30, TimeUnit.DAYS);
-        }
     }
 }
